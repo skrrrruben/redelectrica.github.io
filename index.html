@@ -62,7 +62,7 @@
             transparent: true,
         });
 
-        var wmsLayerGeneradores = L.tileLayer.wms("http://localhost:8080/geoserver/wms?", {
+        var wmsLayerGeneradores = L.tileLayer.wms("http://ec2-13-61-155-28.eu-north-1.compute.amazonaws.com:8080/geoserver/wms?", {
             layers: "MongoDBDD:generadores",
             format: "image/png",
             transparent: true,
