@@ -50,19 +50,19 @@
         }).addTo(map);
 
         // Definición de las capas WMS existentes
-        var wmsLayerSubestaciones = L.tileLayer.wms("http://localhost:8080/geoserver/wms?", {
+        var wmsLayerSubestaciones = L.tileLayer.wms("http://ec2-13-61-155-28.eu-north-1.compute.amazonaws.com:8080/geoserver/wms?", {
             layers: "MongoDBDD:subestaciones",
             format: "image/png",
             transparent: true,
         });
 
-        var wmsLayerRedesElectricas = L.tileLayer.wms("http://localhost:8080/geoserver/wms?", {
+        var wmsLayerRedesElectricas = L.tileLayer.wms("http://ec2-13-61-155-28.eu-north-1.compute.amazonaws.com:8080/geoserver/wms?", {
             layers: "MongoDBDD:redeselectricas",
             format: "image/png",
             transparent: true,
         });
 
-        var wmsLayerGeneradores = L.tileLayer.wms("http://ec2-13-61-155-28.eu-north-1.compute.amazonaws.com:8080/geoserver/wms?", {
+        var wmsLayerGeneradores = L.tileLayer.wms("http://http://ec2-13-61-155-28.eu-north-1.compute.amazonaws.com:8080/geoserver/wms?", {
             layers: "MongoDBDD:generadores",
             format: "image/png",
             transparent: true,
