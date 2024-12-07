@@ -17,17 +17,17 @@
             height: 100%;
         }
         .leaflet-control-layers {
-            background: #003366; /* Azul oscuro */
+            background: #003366;
             border-radius: 5px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
             padding: 10px;
-            color: white; /* Texto blanco */
+            color: white;
         }
         .leaflet-control-layers label {
             display: flex;
             align-items: center;
             margin-bottom: 5px;
-            color: white; /* Texto blanco */
+            color: white;
         }
         .leaflet-control-layers input[type="checkbox"] {
             margin-right: 8px;
@@ -35,21 +35,19 @@
         .leaflet-control-layers h3 {
             margin: 0;
             font-size: 16px;
-            color: #ffffff; /* Títulos en blanco */
+            color: #ffffff;
         }
     </style>
 </head>
 <body>
     <div id="map"></div>
     <script>
-        var map = L.map("map").setView([40.4168, -3.7038], 5); // Centrado en España
+        var map = L.map("map").setView([40.4168, -3.7038], 5);
 
-        // Añadir OpenStreetMap al mapa
         var osmLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
             attribution: "© OpenStreetMap contributors",
         }).addTo(map);
 
-        // Definición de las capas WMS existentes
         var wmsLayerSubestaciones = L.tileLayer.wms("http://ec2-13-51-100-199.eu-north-1.compute.amazonaws.com:8080/geoserver/wms?", {
             layers: "MongoDBDD:subestaciones",
             format: "image/png",
@@ -62,7 +60,7 @@
             transparent: true,
         });
 
-        var wmsLayerGeneradores = L.tileLayer.wms("https://http://ec2-13-51-100-199.eu-north-1.compute.amazonaws.com:8080/geoserver/wms?", {
+        var wmsLayerGeneradores = L.tileLayer.wms("http://ec2-13-51-100-199.eu-north-1.compute.amazonaws.com:8080/geoserver/wms?", {
             layers: "MongoDBDD:generadores",
             format: "image/png",
             transparent: true,
@@ -74,7 +72,6 @@
             transparent: true,
         });
 
-        // Nuevas capas WMS para inundaciones
         var wmsLayerFluvialT10 = L.tileLayer.wms("http://servicios.idee.es/wms-inspire/riesgos-naturales/inundaciones?", {
             layers: "NZ.Flood.FluvialT10",
             format: "image/png",
@@ -105,7 +102,6 @@
             transparent: true,
         });
 
-        // Nuevas capas WMS para redes de transporte
         var wmsLayerRailTransportNetwork = L.tileLayer.wms("https://servicios.idee.es/wms-inspire/transportes?", {
             layers: "TN.RailTransportNetwork.RailwayLink",
             format: "image/png",
@@ -118,8 +114,10 @@
             transparent: true,
         });
 
-        // Agregar el control de capas
-        var baseMaps = { "OpenStreetMap": osmLayer };
+        var baseMaps = {
+            "OpenStreetMap": osmLayer
+        };
+
         var overlayMaps = {
             "Subestaciones": wmsLayerSubestaciones,
             "Redes Eléctricas": wmsLayerRedesElectricas,
@@ -134,108 +132,106 @@
             "Enlace de Carretera": wmsLayerRoadTransportNetwork
         };
 
-        // Añadir el control de capas al mapa
-        var controlLayers = L.control.layers(baseMaps, overlayMaps, { position: 'topright', collapsed: false }).addTo(map);
+        var controlLayers = L.control.layers(baseMaps, overlayMaps, {
+            position: 'topright',
+            collapsed: false
+        }).addTo(map);
 
-       // Estilizar el control de capas
-       controlLayers.getContainer().classList.add('custom-control-layers');
+        controlLayers.getContainer().classList.add('custom-control-layers');
 
-       // Función para manejar clics en el mapa
-       map.on("click", function (e) {
-           var latlng = e.latlng;
-           var activeOverlays = [];
+        map.on("click", function (e) {
+            var latlng = e.latlng;
+            var activeOverlays = [];
 
-           // Determinar qué capas están activas
-           map.eachLayer(function(layer) {
-               if (layer.options && layer.options.layers) {
-                   activeOverlays.push(layer.options.layers);
-               }
-           });
+            map.eachLayer(function(layer) {
+                if (layer.options && layer.options.layers) {
+                    activeOverlays.push(layer.options.layers);
+                }
+            });
 
-           var urls = [];
+            var urls = [];
 
-           // Verificar si cada capa está activa antes de solicitar información
-           if (activeOverlays.includes("MongoDBDD:subestaciones")) {
-               urls.push(getFeatureInfoUrl(latlng, wmsLayerSubestaciones));
-           }
-           if (activeOverlays.includes("MongoDBDD:redeselectricas")) {
-               urls.push(getFeatureInfoUrl(latlng, wmsLayerRedesElectricas));
-           }
-           if (activeOverlays.includes("MongoDBDD:generadores")) {
-               urls.push(getFeatureInfoUrl(latlng, wmsLayerGeneradores));
-           }
-           if (activeOverlays.includes("protected_areas:WDPA_WDOECM_Mar2023_Public_ESP_shp-polygons_2")) {
-               urls.push(getFeatureInfoUrl(latlng, wmsLayerProtectedAreas));
-           }
-           if (activeOverlays.includes("NZ.Flood.FluvialT10")) {
-               urls.push(getFeatureInfoUrl(latlng, wmsLayerFluvialT10));
-           }
-           if (activeOverlays.includes("NZ.Flood.FluvialT100")) {
-               urls.push(getFeatureInfoUrl(latlng, wmsLayerFluvialT100));
-           }
-           if (activeOverlays.includes("NZ.Flood.FluvialT500")) {
-               urls.push(getFeatureInfoUrl(latlng, wmsLayerFluvialT500));
-           }
-           if (activeOverlays.includes("NZ.Flood.MarinaT100")) {
-               urls.push(getFeatureInfoUrl(latlng, wmsLayerMarinaT100));
-           }
-           if (activeOverlays.includes("NZ.Flood.MarinaT500")) {
-               urls.push(getFeatureInfoUrl(latlng, wmsLayerMarinaT500));
-           }
-           if (activeOverlays.includes("TN.RailTransportNetwork.RailwayLink")) {
-               urls.push(getFeatureInfoUrl(latlng, wmsLayerRailTransportNetwork));
-           }
-           if (activeOverlays.includes("TN.RoadTransportNetwork.RoadLink")) {
-               urls.push(getFeatureInfoUrl(latlng, wmsLayerRoadTransportNetwork));
-           }
+            if (activeOverlays.includes("MongoDBDD:subestaciones")) {
+                urls.push(getFeatureInfoUrl(latlng, wmsLayerSubestaciones));
+            }
+            if (activeOverlays.includes("MongoDBDD:redeselectricas")) {
+                urls.push(getFeatureInfoUrl(latlng, wmsLayerRedesElectricas));
+            }
+            if (activeOverlays.includes("MongoDBDD:generadores")) {
+                urls.push(getFeatureInfoUrl(latlng, wmsLayerGeneradores));
+            }
+            if (activeOverlays.includes("protected_areas:WDPA_WDOECM_Mar2023_Public_ESP_shp-polygons_2")) {
+                urls.push(getFeatureInfoUrl(latlng, wmsLayerProtectedAreas));
+            }
+            if (activeOverlays.includes("NZ.Flood.FluvialT10")) {
+                urls.push(getFeatureInfoUrl(latlng, wmsLayerFluvialT10));
+            }
+            if (activeOverlays.includes("NZ.Flood.FluvialT100")) {
+                urls.push(getFeatureInfoUrl(latlng, wmsLayerFluvialT100));
+            }
+            if (activeOverlays.includes("NZ.Flood.FluvialT500")) {
+                urls.push(getFeatureInfoUrl(latlng, wmsLayerFluvialT500));
+            }
+            if (activeOverlays.includes("NZ.Flood.MarinaT100")) {
+                urls.push(getFeatureInfoUrl(latlng, wmsLayerMarinaT100));
+            }
+            if (activeOverlays.includes("NZ.Flood.MarinaT500")) {
+                urls.push(getFeatureInfoUrl(latlng, wmsLayerMarinaT500));
+            }
+            if (activeOverlays.includes("TN.RailTransportNetwork.RailwayLink")) {
+                urls.push(getFeatureInfoUrl(latlng, wmsLayerRailTransportNetwork));
+            }
+            if (activeOverlays.includes("TN.RoadTransportNetwork.RoadLink")) {
+                urls.push(getFeatureInfoUrl(latlng, wmsLayerRoadTransportNetwork));
+            }
 
-          $.each(urls, function(index, url) {
-              $.ajax({
-                  url: url,
-                  success: function (data) {
-                      if (data.features && data.features.length > 0) {
-                          var content = formatFeatureInfo(data.features[0].properties);
-                          L.popup().setLatLng(latlng).setContent(content).openOn(map);
-                      }
-                  },
-                  error: function (xhr, status, error) {
-                      console.error("Error en la solicitud:", status, error);
-                  }
-              });
-          });
-       });
+            $.each(urls, function(index, url) {
+                $.ajax({
+                    url: url,
+                    success: function (data) {
+                        if (data.features && data.features.length > 0) {
+                            var content = formatFeatureInfo(data.features[0].properties);
+                            L.popup().setLatLng(latlng).setContent(content).openOn(map);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error en la solicitud:", status, error);
+                    }
+                });
+            });
+        });
 
-       function getFeatureInfoUrl(latlng, layer) {
-          var point = map.latLngToContainerPoint(latlng, map.getZoom());
-          var size = map.getSize();
-          var params = {
-              request: "GetFeatureInfo",
-              service: "WMS",
-              srs: "EPSG:4326",
-              styles: "",
-              transparent: true,
-              version: "1.1.1",
-              format: "image/png",
-              bbox: map.getBounds().toBBoxString(),
-              height: size.y,
-              width: size.x,
-              layers: layer.options.layers,
-              query_layers: layer.options.layers,
-              info_format: "application/json",
-              x: Math.round(point.x),
-              y: Math.round(point.y),
-          };
-          return layer._url + L.Util.getParamString(params, layer._url, true);
-      }
+        function getFeatureInfoUrl(latlng, layer) {
+            var point = map.latLngToContainerPoint(latlng, map.getZoom());
+            var size = map.getSize();
+            var params = {
+                request: "GetFeatureInfo",
+                service: "WMS",
+                srs: "EPSG:4326",
+                styles: "",
+                transparent: true,
+                version: "1.1.1",
+                format: "image/png",
+                bbox: map.getBounds().toBBoxString(),
+                height: size.y,
+                width: size.x,
+                layers: layer.options.layers,
+                query_layers: layer.options.layers,
+                info_format: "application/json",
+                x: Math.round(point.x),
+                y: Math.round(point.y),
+            };
+            return layer._url + L.Util.getParamString(params, layer._url, true);
+        }
 
-      function formatFeatureInfo(properties) {
-          var content = "<table>";
-          for (var key in properties) {
-              content += "<tr><th>" + key + "</th><td>" + properties[key] + "</td></tr>";
-          }
-          content += "</table>";
-          return content;
-      }
+        function formatFeatureInfo(properties) {
+            var content = "<table>";
+            for (var key in properties) {
+                content += "<tr><th>" + key + "</th><td>" + properties[key] + "</td></tr>";
+            }
+            content += "</table>";
+            return content;
+        }
     </script>
 </body>
 </html>
