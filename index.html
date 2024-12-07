@@ -23,20 +23,20 @@
             attribution: "© OpenStreetMap contributors",
         }).addTo(map);
 
-        // Definición de las capas WMS existentes
-        var wmsLayerSubestaciones = L.tileLayer.wms("https://ec2-13-51-100-199.eu-north-1.compute.amazonaws.com:8080/geoserver/wms?", {
+        // Definición de las capas WMS con HTTPS
+        var wmsLayerSubestaciones = L.tileLayer.wms("https://ec2-13-51-100-199.eu-north-1.compute.amazonaws.com:8443/geoserver/wms?", {
             layers: "MongoDBDD:subestaciones",
             format: "image/png",
             transparent: true,
         });
 
-        var wmsLayerRedesElectricas = L.tileLayer.wms("http://ec2-13-51-100-199.eu-north-1.compute.amazonaws.com:8080/geoserver/wms?", {
+        var wmsLayerRedesElectricas = L.tileLayer.wms("https://ec2-13-51-100-199.eu-north-1.compute.amazonaws.com:8443/geoserver/wms?", {
             layers: "MongoDBDD:redeselectricas",
             format: "image/png",
             transparent: true,
         });
 
-        var wmsLayerGeneradores = L.tileLayer.wms("http://ec2-13-51-100-199.eu-north-1.compute.amazonaws.com:8080/geoserver/wms?", {
+        var wmsLayerGeneradores = L.tileLayer.wms("https://ec2-13-51-100-199.eu-north-1.compute.amazonaws.com:8443/geoserver/wms?", {
             layers: "MongoDBDD:generadores",
             format: "image/png",
             transparent: true,
@@ -48,32 +48,31 @@
             transparent: true,
         });
 
-        // Definición de las nuevas capas WMS para inundaciones
-        var wmsLayerFluvialT10 = L.tileLayer.wms("http://servicios.idee.es/wms-inspire/riesgos-naturales/inundaciones?", {
+        var wmsLayerFluvialT10 = L.tileLayer.wms("https://servicios.idee.es/wms-inspire/riesgos-naturales/inundaciones?", {
             layers: "NZ.Flood.FluvialT10",
             format: "image/png",
             transparent: true,
         });
 
-        var wmsLayerFluvialT100 = L.tileLayer.wms("http://servicios.idee.es/wms-inspire/riesgos-naturales/inundaciones?", {
+        var wmsLayerFluvialT100 = L.tileLayer.wms("https://servicios.idee.es/wms-inspire/riesgos-naturales/inundaciones?", {
             layers: "NZ.Flood.FluvialT100",
             format: "image/png",
             transparent: true,
         });
 
-        var wmsLayerFluvialT500 = L.tileLayer.wms("http://servicios.idee.es/wms-inspire/riesgos-naturales/inundaciones?", {
+        var wmsLayerFluvialT500 = L.tileLayer.wms("https://servicios.idee.es/wms-inspire/riesgos-naturales/inundaciones?", {
             layers: "NZ.Flood.FluvialT500",
             format: "image/png",
             transparent: true,
         });
 
-        var wmsLayerMarinaT100 = L.tileLayer.wms("http://servicios.idee.es/wms-inspire/riesgos-naturales/inundaciones?", {
+        var wmsLayerMarinaT100 = L.tileLayer.wms("https://servicios.idee.es/wms-inspire/riesgos-naturales/inundaciones?", {
             layers: "NZ.Flood.MarinaT100",
             format: "image/png",
             transparent: true,
         });
 
-        var wmsLayerMarinaT500 = L.tileLayer.wms("http://servicios.idee.es/wms-inspire/riesgos-naturales/inundaciones?", {
+        var wmsLayerMarinaT500 = L.tileLayer.wms("https://servicios.idee.es/wms-inspire/riesgos-naturales/inundaciones?", {
             layers: "NZ.Flood.MarinaT500",
             format: "image/png",
             transparent: true,
@@ -89,7 +88,6 @@
             "Redes Eléctricas": wmsLayerRedesElectricas,
             "Generadores": wmsLayerGeneradores,
             "Áreas Protegidas": wmsLayerProtectedAreas,
-            // Agrupando inundaciones en subcategorías
             "Inundaciones Fluviales T=10 años": wmsLayerFluvialT10,
             "Inundaciones Fluviales T=100 años": wmsLayerFluvialT100,
             "Inundaciones Fluviales T=500 años": wmsLayerFluvialT500,
@@ -102,102 +100,6 @@
             position: 'topright',
             collapsed: false
         }).addTo(map);
-
-        // Función para manejar clics en el mapa
-        map.on("click", function (e) {
-            var latlng = e.latlng;
-            var activeOverlays = [];
-
-            // Determinar qué capas están activas
-            map.eachLayer(function(layer) {
-                if (layer.options && layer.options.layers) {
-                    activeOverlays.push(layer.options.layers);
-                }
-                if (layer instanceof L.TileLayer && layer._url.includes('inundaciones')) {
-                    activeOverlays.push(layer.options.layers);
-                }
-            });
-
-            var urls = [];
-            
-            // Verificar si cada capa está activa antes de solicitar información
-            if (activeOverlays.includes("MongoDBDD:subestaciones")) {
-                urls.push(getFeatureInfoUrl(latlng, wmsLayerSubestaciones));
-            }
-            if (activeOverlays.includes("MongoDBDD:redeselectricas")) {
-                urls.push(getFeatureInfoUrl(latlng, wmsLayerRedesElectricas));
-            }
-            if (activeOverlays.includes("MongoDBDD:generadores")) {
-                urls.push(getFeatureInfoUrl(latlng, wmsLayerGeneradores));
-            }
-            if (activeOverlays.includes("protected_areas:WDPA_WDOECM_Mar2023_Public_ESP_shp-polygons_2")) {
-                urls.push(getFeatureInfoUrl(latlng, wmsLayerProtectedAreas));
-            }
-            if (activeOverlays.includes("NZ.Flood.FluvialT10")) {
-                urls.push(getFeatureInfoUrl(latlng, wmsLayerFluvialT10));
-            }
-            if (activeOverlays.includes("NZ.Flood.FluvialT100")) {
-                urls.push(getFeatureInfoUrl(latlng, wmsLayerFluvialT100));
-            }
-            if (activeOverlays.includes("NZ.Flood.FluvialT500")) {
-                urls.push(getFeatureInfoUrl(latlng, wmsLayerFluvialT500));
-            }
-            if (activeOverlays.includes("NZ.Flood.MarinaT100")) {
-                urls.push(getFeatureInfoUrl(latlng, wmsLayerMarinaT100));
-            }
-            if (activeOverlays.includes("NZ.Flood.MarinaT500")) {
-                urls.push(getFeatureInfoUrl(latlng, wmsLayerMarinaT500));
-            }
-
-            $.each(urls, function(index, url) {
-                $.ajax({
-                    url: url,
-                    success: function (data) {
-                        if (data.features && data.features.length > 0) {
-                            var content = formatFeatureInfo(data.features[0].properties);
-                            L.popup().setLatLng(latlng).setContent(content).openOn(map);
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("Error en la solicitud:", status, error);
-                    }
-                });
-            });
-        });
-
-        function getFeatureInfoUrl(latlng, layer) {
-            var point = map.latLngToContainerPoint(latlng, map.getZoom());
-            var size = map.getSize();
-
-            var params = {
-                request: "GetFeatureInfo",
-                service: "WMS",
-                srs: "EPSG:4326",
-                styles: "",
-                transparent: true,
-                version: "1.1.1",
-                format: "image/png",
-                bbox: map.getBounds().toBBoxString(),
-                height: size.y,
-                width: size.x,
-                layers: layer.options.layers,
-                query_layers: layer.options.layers,
-                info_format: "application/json",
-                x: Math.round(point.x),
-                y: Math.round(point.y),
-            };
-
-            return layer._url + L.Util.getParamString(params, layer._url, true);
-        }
-
-        function formatFeatureInfo(properties) {
-            var content = "<table>";
-            for (var key in properties) {
-                content += "<tr><th>" + key + "</th><td>" + properties[key] + "</td></tr>";
-            }
-            content += "</table>";
-            return content;
-        }
     </script>
 </body>
 </html>
